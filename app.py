@@ -130,7 +130,7 @@ try:
     st.subheader("Time Progression Chart:")
     chart_data = pd.DataFrame({
         "Tier": tiers,
-        "Cumulative Time (s)": breakdown["Cumulative Time"].apply(format_time),
+        "Cumulative Time (s)": breakdown["Cumulative Time"],
         "Cumulative XP": breakdown["Cumulative XP"],
         "Cumulative Level": breakdown["Cumulative Level"]
     })
