@@ -83,8 +83,6 @@ try:
             )
 
     if st.button("Calculate"):
-        st.success(f"Calculation complete! Total XP: {total_xp:.0f}, Total Level: {total_level:.2f}, Total Time: {format_time(total_time)}")
-
         total_xp = sum(st.session_state.amounts[tier] * st.session_state.interaction_xp for tier in tiers) + base_xp
         total_level = calculate_level(total_xp)
 
@@ -99,8 +97,8 @@ try:
             total_time = sum(st.session_state.amounts[tier] * st.session_state.base_timer / boosts[tier] for tier in tiers)
             st.metric("Total Time", format_time(total_time))
 
-        if st.button("Calculate"):
-            st.success(f"Calculation complete! Total XP: {total_xp:.0f}, Total Level: {total_level:.2f}, Total Time: {format_time(total_time)}")
+
+        st.success(f"Calculation complete! Total XP: {total_xp:.0f}, Total Level: {total_level:.2f}, Total Time: {format_time(total_time)}")
 
         st.subheader("Boost Breakdown:")
         breakdown = pd.DataFrame({
