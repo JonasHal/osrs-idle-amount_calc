@@ -131,6 +131,7 @@ try:
     chart_data = pd.DataFrame({
         "Tier": tiers,
         "Cumulative Time (s)": breakdown["Cumulative Time"],
+        "Formatted Cumulative Time": breakdown["Cumulative Time"].apply(format_time),
         "Cumulative XP": breakdown["Cumulative XP"],
         "Cumulative Level": breakdown["Cumulative Level"]
     })
