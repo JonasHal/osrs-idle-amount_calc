@@ -82,67 +82,70 @@ try:
                 key=f"input_{tier}"
             )
 
-    total_xp = sum(st.session_state.amounts[tier] * st.session_state.interaction_xp for tier in tiers) + base_xp
-    total_level = calculate_level(total_xp)
-
-    st.subheader("Results:")
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.metric("Total Level", f"{total_level:.2f}")
-    with col2:
-        st.metric("Total XP", f"{total_xp:.0f}")
-    with col3:
-        total_time = sum(st.session_state.amounts[tier] * st.session_state.base_timer / boosts[tier] for tier in tiers)
-        st.metric("Total Time", format_time(total_time))
-
     if st.button("Calculate"):
         st.success(f"Calculation complete! Total XP: {total_xp:.0f}, Total Level: {total_level:.2f}, Total Time: {format_time(total_time)}")
 
-    st.subheader("Boost Breakdown:")
-    breakdown = pd.DataFrame({
-        "Tier to hit": tiers,
-        "Amount": [st.session_state.amounts[tier] for tier in tiers],
-        "Boost Multiplier": [boosts[tier] for tier in tiers],
-        "Time per Action (s)": [st.session_state.base_timer / boosts[tier] for tier in tiers],
-        "Total Time (s)": [st.session_state.amounts[tier] * st.session_state.base_timer / boosts[tier] for tier in tiers],
-        "XP per Action": [st.session_state.interaction_xp for tier in tiers],
-        "Total XP Contribution": [st.session_state.amounts[tier] * st.session_state.interaction_xp for tier in tiers]
-    })
+        total_xp = sum(st.session_state.amounts[tier] * st.session_state.interaction_xp for tier in tiers) + base_xp
+        total_level = calculate_level(total_xp)
 
-    cumulative_xp = base_xp
-    cumulative_time = 0.0
-    breakdown["Cumulative XP"] = base_xp
-    breakdown["Cumulative Level"] = float(st.session_state.base_lvl)
-    breakdown["Cumulative Time"] = 0.0
+        st.subheader("Results:")
+        col1, col2, col3 = st.columns(3)
 
-    for i, row in breakdown.iterrows():
-        cumulative_xp += row["Total XP Contribution"]
-        cumulative_time += row["Total Time (s)"]
-        breakdown.at[i, "Cumulative XP"] = cumulative_xp
-        breakdown.at[i, "Cumulative Level"] = calculate_level(cumulative_xp)
-        breakdown.at[i, "Cumulative Time"] = cumulative_time
+        with col1:
+            st.metric("Total Level", f"{total_level:.2f}")
+        with col2:
+            st.metric("Total XP", f"{total_xp:.0f}")
+        with col3:
+            total_time = sum(st.session_state.amounts[tier] * st.session_state.base_timer / boosts[tier] for tier in tiers)
+            st.metric("Total Time", format_time(total_time))
 
-    breakdown["Formatted Cumulative Time"] = breakdown["Cumulative Time"].apply(format_time)
+        if st.button("Calculate"):
+            st.success(f"Calculation complete! Total XP: {total_xp:.0f}, Total Level: {total_level:.2f}, Total Time: {format_time(total_time)}")
 
-    st.dataframe(breakdown)
+        st.subheader("Boost Breakdown:")
+        breakdown = pd.DataFrame({
+            "Tier to hit": tiers,
+            "Amount": [st.session_state.amounts[tier] for tier in tiers],
+            "Boost Multiplier": [boosts[tier] for tier in tiers],
+            "Time per Action (s)": [st.session_state.base_timer / boosts[tier] for tier in tiers],
+            "Total Time (s)": [st.session_state.amounts[tier] * st.session_state.base_timer / boosts[tier] for tier in tiers],
+            "XP per Action": [st.session_state.interaction_xp for tier in tiers],
+            "Total XP Contribution": [st.session_state.amounts[tier] * st.session_state.interaction_xp for tier in tiers]
+        })
 
-    st.subheader("Time Progression Chart:")
-    chart_data = pd.DataFrame({
-        "Tier": tiers,
-        "Cumulative Time (s)": breakdown["Cumulative Time"],
-        "Formatted Cumulative Time": breakdown["Cumulative Time"].apply(format_time),
-        "Cumulative XP": breakdown["Cumulative XP"],
-        "Cumulative Level": breakdown["Cumulative Level"]
-    })
+        cumulative_xp = base_xp
+        cumulative_time = 0.0
+        breakdown["Cumulative XP"] = base_xp
+        breakdown["Cumulative Level"] = float(st.session_state.base_lvl)
+        breakdown["Cumulative Time"] = 0.0
 
-    time_chart = alt.Chart(chart_data).mark_line(point=True).encode(
-        x=alt.X('Tier', sort=alt.EncodingSortField(field="Cumulative Time (s)", op="sum", order="ascending")),
-        y='Cumulative Time (s)',
-        tooltip=['Tier', 'Formatted Cumulative Time', 'Cumulative XP', 'Cumulative Level']
-    ).properties(title="Time Progression by Tier (Sorted by Time)")
+        for i, row in breakdown.iterrows():
+            cumulative_xp += row["Total XP Contribution"]
+            cumulative_time += row["Total Time (s)"]
+            breakdown.at[i, "Cumulative XP"] = cumulative_xp
+            breakdown.at[i, "Cumulative Level"] = calculate_level(cumulative_xp)
+            breakdown.at[i, "Cumulative Time"] = cumulative_time
 
-    st.altair_chart(time_chart, use_container_width=True)
+        breakdown["Formatted Cumulative Time"] = breakdown["Cumulative Time"].apply(format_time)
+
+        st.dataframe(breakdown)
+
+        st.subheader("Time Progression Chart:")
+        chart_data = pd.DataFrame({
+            "Tier": tiers,
+            "Cumulative Time (s)": breakdown["Cumulative Time"],
+            "Formatted Cumulative Time": breakdown["Cumulative Time"].apply(format_time),
+            "Cumulative XP": breakdown["Cumulative XP"],
+            "Cumulative Level": breakdown["Cumulative Level"]
+        })
+
+        time_chart = alt.Chart(chart_data).mark_line(point=True).encode(
+            x=alt.X('Tier', sort=alt.EncodingSortField(field="Cumulative Time (s)", op="sum", order="ascending")),
+            y='Cumulative Time (s)',
+            tooltip=['Tier', 'Formatted Cumulative Time', 'Cumulative XP', 'Cumulative Level']
+        ).properties(title="Time Progression by Tier (Sorted by Time)")
+
+        st.altair_chart(time_chart, use_container_width=True)
 
 except Exception as e:
     st.error(f"An error occurred: {str(e)}. Please try refreshing the page.")
