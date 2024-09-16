@@ -139,7 +139,7 @@ try:
     time_chart = alt.Chart(chart_data).mark_line(point=True).encode(
         x=alt.X('Tier', sort=alt.EncodingSortField(field="Cumulative Time (s)", op="sum", order="ascending")),
         y='Cumulative Time (s)',
-        tooltip=['Tier', 'Cumulative Time (s)', 'Cumulative XP', 'Cumulative Level']
+        tooltip=['Tier', 'Formatted Cumulative Time', 'Cumulative XP', 'Cumulative Level']
     ).properties(title="Time Progression by Tier (Sorted by Time)")
 
     st.altair_chart(time_chart, use_container_width=True)
